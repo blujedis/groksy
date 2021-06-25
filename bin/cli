@@ -57,19 +57,17 @@ ${colorize('====================================================================
 ${colorize(`${pkg.description}`, 'dim')}
 
 ${colorize('flags:', 'cyanBright')}
-
-  --source, -s          specifies a source to bind             [array]
-  --destination, -d     specifies a destination to bind        [array]
-  --recipe, -r          binds source/destination using recipe  [array]
-  --width, -w           outputs buffer to console              [number]
-  --verbose, -v         outputs buffer to console              [boolean]
-  --help, -h            displays help                          [boolean]
+  --source, -s          specifies a source to bind                [array]
+  --destination, -d     specifies a destination to bind           [array]
+  --recipe, -r          binds source/destination using recipe     [array]
+  --width, -w           outputs buffer to console                 number
+  --verbose, -v         outputs buffer to console                 boolean
+  --help, -h            displays help                             boolean
 
 ${colorize('recipes:', 'cyanBright')}
 ${recipeList} 
 
 ${colorize('examples:', 'cyanBright')}
-
   ${app} -s 127.0.0.1:3306 -d /var/tmp/mysql/mysql.sock 
   ${app} -r mamp
 
