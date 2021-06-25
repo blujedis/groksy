@@ -1,0 +1,41 @@
+{
+  "name": "groksy",
+  "version": "0.0.1",
+  "description": "Proxy for connecting TCP or Unix socket connections.",
+  "main": "lib/index.js",
+  "bin": {
+    "groksy": "bin/cli"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "net",
+    "socket",
+    "proxy",
+    "pipe"
+  ],
+  "files": [
+    "bin",
+    "lib"
+  ],
+  "author": "Blujedi LLC <blujedicorp@gmail.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/blujedis/groksy#readme",
+  "bugs": {
+    "url": "https://github.com/blujedis/groksy/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/blujedis/groksy.git"
+  },
+  "engines": {
+    "node": ">= 10.13.0"
+  },
+  "dependencies": {
+    "ansi-colors": "^4.1.1",
+    "term-size": "^2.2.1",
+    "word-wrap": "^1.2.3",
+    "yargs-parser": "^20.2.7"
+  }
+}

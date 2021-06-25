@@ -1,0 +1,131 @@
+#!/usr/bin/env node
+
+const parser = require('yargs-parser');
+const { join } = require('path');
+const { utils, connect } = require('../lib');
+
+const { createLogger, colorize, loadConfigs, pkg, capitalize } = utils;
+
+const app = pkg.name;
+const appCap = capitalize(app);
+const log = createLogger();
+const cwd = process.cwd();
+
+const defaultRecipes = {
+  mamp: ['127.0.0.1:8889', '/Applications/MAMP/tmp/mysql/mysql.sock'],
+  xampp: ['127.0.0.1:3306', '/Applications/XAMPP/xamppfiles/var/mysql/mysql.sock']
+};
+
+const loadedConfig = loadConfigs([join(cwd, 'package.json'), join(cwd, `${app}.json`)], { recipes: defaultRecipes });
+const { recipes, ...config } = loadedConfig;
+const recipeKeys = Object.keys(recipes);
+const recipeKeysStr = colorize('[' + recipeKeys.join(', ') + ']', 'cyanBright');
+const recipeList = recipeKeys.map(v => '  ' + v).join('\n');
+
+let pargs = parser(process.argv.slice(2), {
+  alias: { source: ['s'], destination: ['d'], help: ['h'], width: ['w'], verbose: ['v'], recipe: ['r'] },
+  array: ['source', 'destination', 'recipe'],
+  boolean: ['help', 'verbose'],
+  number: ['width']
+});
+
+pargs = {
+  source: [],
+  destination: [],
+  ...pargs
+};
+
+
+// coerce recipes 
+pargs.recipe = (pargs.recipe || []).map(v => {
+  v = v.toLowerCase();
+  const hasRecipe = recipeKeys.includes(v);
+  if (!hasRecipe) {
+    log.fill();
+    log.warn(`recipe ${colorize(v, 'yellowBright')} is unknown, valid options: ${recipeKeysStr}`)
+      .fill()
+      .exit();
+  }
+  return v;
+});
+
+const _help = `
+${colorize(`${appCap} Proxy`, 'blueBright')}
+version: ${pkg.version}
+${colorize('=======================================================================', 'blueBright')}
+
+${colorize(`${pkg.description}`, 'dim')}
+
+${colorize('flags:', 'cyanBright')}
+
+  --source, -s          specifies a source to bind             [array]
+  --destination, -d     specifies a destination to bind        [array]
+  --recipe, -r          binds source/destination using recipe  [array]
+  --width, -w           outputs buffer to console              [number]
+  --verbose, -v         outputs buffer to console              [boolean]
+  --help, -h            displays help                          [boolean]
+
+${colorize('recipes:', 'cyanBright')}
+${recipeList} 
+
+${colorize('examples:', 'cyanBright')}
+
+  ${app} -s 127.0.0.1:3306 -d /var/tmp/mysql/mysql.sock 
+  ${app} -r mamp
+
+`;
+
+if (pargs.help) {
+  console.log(_help);
+  return;
+}
+
+if (pargs.recipe.length) {
+  pargs.recipe.forEach(r => {
+    const [src, dest] = recipes[r];
+    if (!src || !dest) {
+      log.error(`recipe ${r} has missing or invalid configuration.`);
+      process.exit();
+    }
+    pargs.source.push(src);
+    pargs.destination.push(dest);
+  });
+}
+
+const { source: sources, destination: destinations } = pargs;
+const helpCmd = `run ${colorize(`${app} -h`, 'cyan')} for help`;
+
+if (!sources.length) {
+  log.fill();
+  log.warn(`at least one source is required.`)
+    .fill()
+    .writeLn(helpCmd)
+    .fill()
+    .exit();
+  return;
+}
+
+if (!destinations.length) {
+  log.fill();
+  log.warn(`at least one destination is required.`)
+    .fill()
+    .writeLn(helpCmd)
+    .fill()
+    .exit();
+  return;
+}
+
+const { verbose, width } = pargs;
+
+const options = {
+  ...config,
+  width,
+  verbose,
+  sources,
+  destinations
+};
+
+connect(options);
+
+
+
